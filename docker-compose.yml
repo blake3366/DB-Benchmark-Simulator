@@ -38,8 +38,7 @@ services:
       REDIS_PORT: ${REDIS_PORT}
     entrypoint: ["sh", "/app/entrypoint.sh"]
     volumes:
-      - ./backend:/app
-      - /app/node_modules
+      - ./backend:/app # 將本機 backend 資料夾掛載到容器內的 /app
     networks:
       - app-net
 

@@ -13,4 +13,4 @@ npx prisma migrate dev --name init
 
 # 啟動應用程式
 echo "🚀 Starting server..."
-exec pnpm start
+exec pnpm dev start
