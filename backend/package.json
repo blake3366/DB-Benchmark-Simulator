@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "tsx index.ts",
+    "dev": "nodemon --watch . --ext ts --exec tsx index.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.9.0",
@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.17.18",
+    "@types/node": "^24.0.3",
     "nodemon": "^3.1.10",
     "prisma": "^6.9.0",
     "ts-node": "^10.9.2",

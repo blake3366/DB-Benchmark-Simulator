@@ -1,19 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import _ from 'lodash';
-
-
-const random_number = _.sampleSize(_.range(1, 100), 10); 
-const emails = random_number.map(value => `user${value}@example.com`);
+import { getRandomEmails, inputPassword } from './login-utils';
 
 const prisma = new PrismaClient();
-const inputPassword = '123456';
 
 async function simulateLoginVerbose(email: string): Promise<number> {
   const start = Date.now();
-
-  console.log(`🟡 [${email}] 開始登入流程`);
-
   const dbStart = Date.now();
   const user = await prisma.user.findUnique({ where: { email } });
   const dbEnd = Date.now();
@@ -33,22 +26,25 @@ async function simulateLoginVerbose(email: string): Promise<number> {
   console.log(`    ├─ 密碼比對時間：${hashEnd - hashStart} ms`);
   console.log(`    └─ 總耗時：${total} ms`);
 
-  return total;
+  return {
+    dbTime: dbEnd - dbStart,
+    hashTime: hashEnd - hashStart,
+    totalTime: total
+  };
 }
 
-async function main() {
-  console.log('🚀 PostgreSQL Login Benchmark (詳細過程):');
+export async function simulateLoginWithPostgres (count: number): Promise<any> {
+  const emails = getRandomEmails(count, 100);
   const results = await Promise.all(emails.map(simulateLoginVerbose));
-
-  const avg = results.reduce((a, b) => a + b, 0) / results.length;
-  console.log(`\n✅ 平均耗時：${avg.toFixed(2)} ms`);
-  console.log(`⏱ 最快：${Math.min(...results)} ms`);
-  console.log(`🐢 最慢：${Math.max(...results)} ms`);
-
+  const totalTimes = results.map(result => result.totalTime);
+  console.log(totalTimes.map((time, index) => `🔵 [${emails[index]}] 耗時：${time} ms`).join('\n'));
+  const avg = totalTimes.reduce((a, b) => a + b, 0) / totalTimes.length;
+  const result = {
+    totalTimes: totalTimes,
+    averageTime: avg,
+    fastestTime: Math.min(...totalTimes),
+    slowestTime: Math.max(...totalTimes)
+  };
   await prisma.$disconnect();
+  return result;
 }
-
-main().catch((e) => {
-  console.error('❌ 發生錯誤：', e);
-  process.exit(1);
-});
