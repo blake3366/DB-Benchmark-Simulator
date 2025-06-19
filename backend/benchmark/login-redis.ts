@@ -2,56 +2,58 @@ import { PrismaClient } from '@prisma/client';
 import { createClient } from 'redis';
 import bcrypt from 'bcryptjs';
 import _ from 'lodash';
+import { getRandomEmails, inputPassword, redis} from './login-utils';
 
 const prisma = new PrismaClient();
-const redis = createClient({ url: process.env.REDIS_URL || 'redis://redis:6379' });
 
-// function getRandomEmails(count: number, total: number): string[] {
-//   const indices = Array.from({ length: total }, (_, i) => i + 1);
-//   const shuffled = indices.sort(() => Math.random() - 0.5);
-//   const selected = shuffled.slice(0, count);
-//   return selected.map(i => `user${i}@example.com`);
-// }
-const random_number = _.sampleSize(_.range(1, 100), 10); 
-const emails = random_number.map(value => `user${value}@example.com`);
+export type RedisBenchmarkResult = {
+  dbTime: number;
+  cacheTime: number;
+  totalTime: number;
+};
 
-
-async function simulateLogin(email: string): Promise<number> {
+async function simulateLogin(email: string): Promise<RedisBenchmarkResult> {
+  console.log(`🔵 [${email}] 模擬登入流程開始`);
   const start = Date.now();
   let userData: any;
-
+  const cacheStart = Date.now();
   const cache = await redis.get(email);
+  let cacheEnd: any;
+  let dbEnd: any;
   if (cache) {
     userData = JSON.parse(cache);
+    cacheEnd = Date.now();
+    console.log(`🔵 [${email}] 使用 Redis 快取，耗時：${ cacheEnd - cacheStart }ms`)
   } else {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) throw new Error(`User ${email} not found`);
     await redis.set(email, JSON.stringify(user));
     userData = user;
+    dbEnd = Date.now();
+    console.log(`🔵 [${email}] Redis 快取未命中，從資料庫耗時：${dbEnd - start}ms`)
   }
 
-  const match = await bcrypt.compare('123456', userData.password);
+  const match = await bcrypt.compare(inputPassword, userData.password);
   if (!match) throw new Error(`Password mismatch for ${email}`);
-
-  return Date.now() - start;
+  console.log(`總耗時：${Date.now() - start} ms`)
+  return {
+    dbTime: dbEnd ? dbEnd - cacheStart : 0,
+    cacheTime: cacheEnd ? cacheEnd - cacheStart : 0,
+    totalTime: Date.now() - start
+  };
 }
 
-async function main() {
-  console.log('🚀 Redis Login Benchmark:');
-  await redis.connect();
-//   const emails = getRandomEmails(10, 100); // 隨機抽 10 人測試
+export async function simulateLoginWithRedis (count: number): Promise<any> {
+  const emails = getRandomEmails(count, 100);
   const results = await Promise.all(emails.map(simulateLogin));
-
-  const avg = results.reduce((a, b) => a + b, 0) / results.length;
-  console.log(`✅ 平均耗時：${avg.toFixed(2)} ms`);
-  console.log(`⏱ 最快：${Math.min(...results)} ms`);
-  console.log(`🐢 最慢：${Math.max(...results)} ms`);
-
-  await redis.quit();
-  await prisma.$disconnect();
+  const totalTimes = results.map(result => result.totalTime);
+  console.log(totalTimes.map((time, index) => `🔵 [${emails[index]}] 耗時：${time} ms`).join('\n'));
+  const avg = totalTimes.reduce((a, b) => a + b, 0) / totalTimes.length;
+  const result = {
+    totalTimes: totalTimes,
+    averageTime: avg,
+    fastestTime: Math.min(...totalTimes),
+    slowestTime: Math.max(...totalTimes)
+  };
+  return result;
 }
-
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});

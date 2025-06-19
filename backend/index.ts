@@ -2,6 +2,8 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 import { simulateLoginWithPostgres } from './benchmark/login-postgres';
+import { simulateLoginWithRedis } from './benchmark/login-redis';
+import { connectRedisInit } from './benchmark/login-utils';
 
 const app = express();
 const prisma = new PrismaClient();
@@ -34,7 +36,7 @@ app.get('/health', async (req: Request, res: Response) => {
   }
 });
 
-app.post('/api/postgres_benchmark', async (req: Request, res: Response) => {
+app.post('/api/benchmark_postgres', async (req: Request, res: Response) => {
   try {
     const count = parseInt(req.body.count as string) || 10;
     const result = await simulateLoginWithPostgres(count);
@@ -42,9 +44,23 @@ app.post('/api/postgres_benchmark', async (req: Request, res: Response) => {
     res.json(result);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Benchmark failed' });
+    res.status(500).json({ error: 'PostgreSQL Benchmark failed' });
   }
 });
+
+app.post('/api/benchmark_redis', async (req: Request, res: Response) => {
+  try {
+    await connectRedisInit();
+    const count = parseInt(req.body.count as string) || 10;
+    const result = await simulateLoginWithRedis(count);
+
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Redis Benchmark failed' });
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
