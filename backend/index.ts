@@ -1,9 +1,9 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
+import { redis, connectRedisInit } from './benchmark/login-utils'; // 確保 redis 已正確初始化
 import { PrismaClient } from '@prisma/client';
 import { simulateLoginWithPostgres } from './benchmark/login-postgres';
 import { simulateLoginWithRedis } from './benchmark/login-redis';
-import { connectRedisInit } from './benchmark/login-utils';
 
 const app = express();
 const prisma = new PrismaClient();
@@ -61,6 +61,17 @@ app.post('/api/benchmark_redis', async (req: Request, res: Response) => {
   }
 });
 
+
+app.post('/api/redis/flush', async (req: Request, res: Response) => {
+  try {
+    await connectRedisInit()
+    await redis.flushAll()
+    res.json({ status: '✅ Redis cache flushed' })
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Redis initialization failed' });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
