@@ -21,3 +21,17 @@ export async function connectRedisInit() {
       console.log('✅ Redis connected');
     }
 }
+export const meanFunction = (array: number[]) => {
+    if (array.length === 0) return 0; // null array check
+    const sum = array.reduce((acc, value) => acc + value, 0);
+    const mean = sum / array.length;
+    return mean;
+}
+
+export const varianceFunction = (array: number[]) => {
+    if (array.length === 0) return 0;
+    const mean = meanFunction(array);
+    const length = array.length;
+    const variance = array.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / length;
+    return variance;
+}
