@@ -68,7 +68,7 @@ export async function simulateLoginWithRedis (count: number): Promise<any> {
     slowestTime: Math.max(...totalTimes),
     hitCount: hitCount,
     missCount: missCount,
-    hitRate: hitRate.toFixed(2)+ '%',
+    hitRate: hitRate.toFixed(2),
   };
   return result;
 }
