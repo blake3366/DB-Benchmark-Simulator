@@ -36,7 +36,7 @@ app.get('/health', async (req: Request, res: Response) => {
   }
 });
 
-app.post('/api/benchmark_postgres', async (req: Request, res: Response) => {
+app.post('/api/benchmark/postgres', async (req: Request, res: Response) => {
   try {
     const count = parseInt(req.body.count as string) || 10;
     const result = await simulateLoginWithPostgres(count);
@@ -48,7 +48,7 @@ app.post('/api/benchmark_postgres', async (req: Request, res: Response) => {
   }
 });
 
-app.post('/api/benchmark_redis', async (req: Request, res: Response) => {
+app.post('/api/benchmark/redis', async (req: Request, res: Response) => {
   try {
     await connectRedisInit();
     const count = parseInt(req.body.count as string) || 10;
