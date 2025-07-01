@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux'
 
 const COLORS = ['#00C49F', '#e57373', '#FFBB28', '#FF8042'];
 
-const renderActiveShape = (props) => {
+const renderActiveShape = (props:any) => {
     const RADIAN = Math.PI / 180;
     const { cx, cy, midAngle, innerRadius, outerRadius, startAngle, endAngle, fill, payload, percent, value } = props;
     const sin = Math.sin(-RADIAN * midAngle);

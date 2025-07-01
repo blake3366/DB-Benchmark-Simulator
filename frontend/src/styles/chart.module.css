@@ -1,0 +1,11 @@
+.chartContainer{
+    margin: '20px';
+    border-radius: '8px';
+    border-color: #f8f8f8;
+    border-style: solid;
+    border-width: '1px';
+}
+.chartTitle{
+    margin-bottom: '10px';
+    border-color: #f8f8f8;
+}

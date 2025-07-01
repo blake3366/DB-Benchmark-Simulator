@@ -1,22 +1,18 @@
 import Head from 'next/head';
-import Link from 'next/link';
 import { Grid } from '@mui/material';
 import Layout from '../components/layout';
 import  DatabaseLineChart from '../components/line_chart';
-import  DatabaseBarChart from '../components/bar_chart';
 import DataPieChart from '../components/pie_chart'
-import Form from '@/components/form';
 import { Item } from '@/components/styledBox';
 import BasicCard from '@/components/post_card';
 import Typography from '@mui/material/Typography';
 
 
-import { useDispatch, useSelector } from 'react-redux'
-import { RootState, AppDispatch } from '../store'
+import { useSelector } from 'react-redux'
+import { RootState } from '../store'
 
 
 export default function FirstPost() {
-  const dispatch = useDispatch<AppDispatch>()
   const dbResult= useSelector((state: RootState) => state.dbResult)
   const postgresql_response = dbResult?.postgresql_response || {};
   const redis_response = dbResult?.redis_response || {};
@@ -32,7 +28,7 @@ export default function FirstPost() {
     hitRate:  redisCacheHitRate
   } = redis_response
   const simulationCount = dbResult?.simulate_count|| 0;
-  let no_data = dbResult?.no_data ?? true;
+  const no_data = dbResult?.no_data ?? true;
 
   return (
     <Layout home={false}>
