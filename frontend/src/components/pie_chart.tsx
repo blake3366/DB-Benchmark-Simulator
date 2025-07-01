@@ -1,15 +1,9 @@
-import { PieChart, Pie, Sector, Cell, Tooltip  } from 'recharts';
+import { PieChart, Pie, Sector, Cell, Tooltip,  ResponsiveContainer } from 'recharts';
 import { Container, Typography } from '@mui/material';
+import { RootState } from '../store'
+import { useSelector } from 'react-redux'
 
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
-
-interface DatabasePieChartProps {
-  rawData: {
-    hitCount: number; 
-    missCount: number; 
-  };
-}
+const COLORS = ['#00C49F', '#e57373', '#FFBB28', '#FF8042'];
 
 const renderActiveShape = (props) => {
     const RADIAN = Math.PI / 180;
@@ -18,9 +12,9 @@ const renderActiveShape = (props) => {
     const cos = Math.cos(-RADIAN * midAngle);
     const sx = cx + (outerRadius + 10) * cos;
     const sy = cy + (outerRadius + 10) * sin;
-    const mx = cx + (outerRadius + 30) * cos;
-    const my = cy + (outerRadius + 30) * sin;
-    const ex = mx + (cos >= 0 ? 1 : -1) * 22;
+    const mx = cx + (outerRadius + 20) * cos;
+    const my = cy + (outerRadius + 20) * sin;
+    const ex = mx + (cos >= 0 ? 1 : -1) * 10;
     const ey = my;
     const textAnchor = cos >= 0 ? 'start' : 'end';
   
@@ -50,30 +44,31 @@ const renderActiveShape = (props) => {
         <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
         <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
         <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} textAnchor={textAnchor} fill="#333" fontSize="10">{`${payload.name} Count : ${value}`}</text>
-        <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} dy={18} textAnchor={textAnchor} fill="#999" fontSize="10">
+        <text x={ex + (cos >= 0 ? 1 : -1) * 12} y={ey} dy={10} textAnchor={textAnchor} fill="#999" fontSize="10">
           {`${payload.name} Rate ${(percent * 100).toFixed(2)}%`}
         </text>
       </g>
     );
 };
-export default function DataPieChart ({ rawData }: DatabasePieChartProps){
-    const { hitCount, missCount } = rawData
+export default function DataPieChart (){
+    const redis_response = useSelector((state: RootState) => state.dbResult.redis_response) || {}
+    const { hitCount, missCount } = redis_response
     const data = [
         { name: 'Hit', value: hitCount },
         { name: 'Miss', value: missCount },
     ];
     return (
-        <Container maxWidth="xs" sx={{ mt: 2, mb: 2, p: 2, bgcolor: 'white', borderRadius: 2, boxShadow: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Container sx={{ mt: 2, mb: 2, p: 2, bgcolor: 'white',  overflow: 'visible', position: 'relative', height:'300px', alignItems:'center', justifyContent:'center', display:'flex', flexDirection:'column'}}>
           <Typography variant="subtitle2" gutterBottom sx={{ color: 'black', textAlign: 'center'}}>
              Redis Cache Hit vs Miss
           </Typography>
-        <PieChart width={600} height={200}>
+        <ResponsiveContainer width="100%" height={250} style={{ overflow: 'visible' }}> 
+        <PieChart>
           <Pie
             data={data}
             cx="50%"
             cy="50%"
             labelLine={false}
-            // label={renderCustomizedLabel}
             innerRadius={60}
             outerRadius={80}
             fill="#8884d8"
@@ -86,6 +81,7 @@ export default function DataPieChart ({ rawData }: DatabasePieChartProps){
           </Pie>
           <Tooltip content={<></>} />
         </PieChart>
+        </ResponsiveContainer>
         </Container>
     );
 }

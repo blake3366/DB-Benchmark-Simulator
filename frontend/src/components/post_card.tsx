@@ -17,7 +17,7 @@ interface DatabaseBarChartProps {
 export default function BasicCard({rawData}: DatabaseBarChartProps) {
   const { primaryKey, color, title, unit, slowestTime, averageTime} = rawData;
   return (
-   <Box sx={{textAlign: 'center'}}>
+   <Box sx={{textAlign: 'center', height:'200px'}}>
      <Typography variant="h6" component="div" sx={{ mb: 2, color: 'text.secondary',}}>
          {title}
      </Typography>

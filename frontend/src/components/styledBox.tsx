@@ -10,7 +10,7 @@ export const Item = styled(Paper)(({ theme }) => ({
     ...theme.applyStyles('dark', {
       backgroundColor: '#1A2027',
     }),
-    // border: '1px solid #eee', // ✅ 加細邊框
+    // border: '1px solid #eee',
     boxShadow: 'none',
     '&:hover': {
       boxShadow: theme.shadows[4],

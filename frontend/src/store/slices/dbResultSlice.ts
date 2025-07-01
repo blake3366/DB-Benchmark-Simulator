@@ -8,9 +8,16 @@ interface dbResultState {
         slowestTime: number,
         variance: number
     }
-    redis_response: any,
-    redis_hit_count: number,
-    redis_miss_count: number,
+    redis_response: {
+        totalTimes: number[],
+        averageTime: number,
+        fastestTime: number,
+        slowestTime: number,
+        hitCount: number,
+        missCount: number,
+        hitRate: string    
+    },
+    simulate_count: number,
     no_data: boolean,
     loading: boolean
     error: string | null
@@ -24,12 +31,19 @@ const initialState: dbResultState = {
     slowestTime: 0,
     variance: 0,
   },
-  redis_response: null,
-  redis_hit_count: 0,
-  redis_miss_count: 0,
+  redis_response: {
+    totalTimes: [],
+    averageTime: 0,
+    fastestTime: 0,
+    slowestTime: 0,
+    hitCount: 0,
+    missCount: 0,
+    hitRate: '',    
+ },
+  simulate_count: 0,
   no_data: true,
   loading: false,
-  error: '11111111 errrrrr',
+  error: '',
 }
 
 const dbResultSlice = createSlice({
@@ -55,22 +69,20 @@ const dbResultSlice = createSlice({
     setRedisResult: (state, action: PayloadAction<any>) => {
         state.redis_response = action.payload
       },
-    setRedisCacheResult: (state, action: PayloadAction<any>) => {
-        state.redis_response = action.payload.data
-        state.redis_hit_count = action.payload.hitCount
-        state.redis_miss_count = action.payload.missCount
-    },
     setError: (state, action: PayloadAction<string>) => {
       state.loading = false
       state.error = action.payload
     },
+    addSimulateCount: (state, action: PayloadAction<number>) => {
+      state.simulate_count +=1
+    },
     resetResult: (state) => {
       state.postgresql_response = initialState.postgresql_response;
       state.redis_response = initialState.redis_response;
-      state.redis_hit_count = initialState.redis_hit_count;
-      state.redis_miss_count = initialState.redis_miss_count;
       state.loading = initialState.loading;
       state.error = initialState.error;
+      state.no_data = initialState.no_data;
+      state.simulate_count = initialState.simulate_count;
     },
   },
 })
@@ -83,6 +95,7 @@ export const {
     setPostgresqlResult, 
     setRedisResult,
     setError, 
-    resetResult 
+    resetResult,
+    addSimulateCount
 } = dbResultSlice.actions
 export default dbResultSlice.reducer
