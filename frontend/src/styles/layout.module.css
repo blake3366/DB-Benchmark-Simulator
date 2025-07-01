@@ -1,0 +1,21 @@
+.container {
+  /* max-width: 36em; */
+  max-width: 90%; 
+  padding: 0 1rem;
+  margin: 3rem auto 6rem;
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  text-overflow: ellipsis;
+  /* align-items: center; */
+  align-items: center;
+  justify-content: space-between;
+  /* border: 1px solid #ddd; */
+}
+
+.backToHome {
+  margin: 3rem 0 0;
+  font-size: 1.2rem;
+}
